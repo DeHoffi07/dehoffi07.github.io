@@ -3,6 +3,7 @@ const COOKIE = 'matchday_tournament_v1';
 const $ = (s, root = document) => root.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2, 10);
 let state;
+let tabTarget = null;
 
 function defaults() { return { players: [], settings: { name: '', mode: 'groups', groupCount: 2, doubleRound: false, thirdPlace: true, swissRounds: 4 }, started: false, groups: [], swiss: { rounds: [] }, ko: null }; }
 function save() { document.cookie = `${COOKIE}=${encodeURIComponent(JSON.stringify(state))}; max-age=31536000; path=/; SameSite=Lax`; $('#statusText').textContent = 'Gespeichert'; }
@@ -103,8 +104,8 @@ function renderTournament() { const view = $('#tournamentView'), mode = state.se
   view.innerHTML = html;
 }
 function render() { const scroll = captureScroll(); if (state.settings.mode === 'groups') assignConsoles(state.groups); assignKOConsoles(); $('#tournamentName').value = state.settings.name; $('#modeSelect').value = state.settings.mode; $('#viewTitle').textContent = state.settings.name || (state.started ? 'Turnierübersicht' : 'Dein Turnier'); playerList(); options(); renderTournament(); restoreScroll(scroll); }
-function scoreChange(input) { const value = input.value.trim(); if (value !== '' && (!/^\d{1,2}$/.test(value))) { input.value = ''; return; } const id = input.dataset.id; let m = state.groups.flatMap(groupMatches).find(x=>x.id===id) || swissMatches().find(x=>x.id===id) || findKOMatch(id); if (!m) return; m[input.dataset.side + 'Score'] = value; save(); render(); }
-function reset() { if (!confirm('Turnier und Ergebnisse wirklich zurücksetzen? Teams bleiben erhalten.')) return; state.started=false; state.groups=[]; state.swiss={rounds:[]}; state.ko=null; save(); render(); toast('Turnier zurückgesetzt.'); }
+function scoreChange(input) { const value = input.value.trim(); if (value !== '' && (!/^\d{1,2}$/.test(value))) { input.value = ''; return; } const id = input.dataset.id; let m = state.groups.flatMap(groupMatches).find(x=>x.id===id) || swissMatches().find(x=>x.id===id) || findKOMatch(id); if (!m) return; m[input.dataset.side + 'Score'] = value; save(); render(); if (tabTarget) { const target = tabTarget; tabTarget = null; requestAnimationFrame(() => document.querySelector(`[data-action="score"][data-id="${target.id}"][data-side="${target.side}"]`)?.focus()); } }
+function reset() { if (!confirm('Das gesamte Turnier inklusive Teams und Einstellungen wirklich zurücksetzen?')) return; state = defaults(); save(); render(); toast('Turnier vollständig zurückgesetzt.'); }
 function onClick(e) { const btn = e.target.closest('[data-action]'); if (!btn) return; const action=btn.dataset.action;
   if (action === 'add-player') { e.preventDefault(); addPlayer(); }
   if (action === 'delete') { state.players = state.players.filter(p=>p.id!==btn.dataset.id); state.started=false; save(); render(); }
@@ -115,5 +116,6 @@ function onClick(e) { const btn = e.target.closest('[data-action]'); if (!btn) r
 }
 function addPlayer() { const input=$('#playerInput'), name=input.value.trim(); if(!name) return toast('Bitte einen Teamnamen eingeben.'); if(state.players.some(p=>p.name.toLowerCase()===name.toLowerCase())) return toast('Dieses Team existiert bereits.'); state.players.push({id:uid(),name}); input.value=''; state.started=false; save(); render(); $('#playerInput').focus(); }
 function onChange(e) { if(e.target.matches('[data-setting]')) { const key=e.target.dataset.setting; state.settings[key]=e.target.type==='checkbox'?e.target.checked:e.target.value; save(); render(); } if(e.target.matches('[data-action="score"]')) scoreChange(e.target); }
-function init() { state=load(); document.addEventListener('click',onClick); document.addEventListener('change',onChange); $('#addPlayerForm').addEventListener('submit',e=>{e.preventDefault();addPlayer();}); render(); }
+function onKeydown(e) { if (e.key !== 'Tab' || !e.target.matches('[data-action="score"]')) return; const fields = [...document.querySelectorAll('[data-action="score"]')].filter(field => !field.disabled); const index = fields.indexOf(e.target); const next = fields[index + (e.shiftKey ? -1 : 1)]; tabTarget = next ? { id: next.dataset.id, side: next.dataset.side } : null; }
+function init() { state=load(); document.addEventListener('click',onClick); document.addEventListener('change',onChange); document.addEventListener('keydown',onKeydown); $('#addPlayerForm').addEventListener('submit',e=>{e.preventDefault();addPlayer();}); render(); }
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();

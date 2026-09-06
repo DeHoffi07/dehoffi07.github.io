@@ -1,0 +1,12 @@
+{
+  "name": "Matchday Turniermanager",
+  "short_name": "Matchday",
+  "description": "Fußballturniere planen und live verwalten.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#090d16",
+  "theme_color": "#090d16",
+  "icons": [
+    { "src": "app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
