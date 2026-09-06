@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matchday — Fußballturnier</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="function.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><div class="brand"><span class="brand-mark">M</span><div><strong>Matchday</strong><small>Turniermanager</small></div></div><div id="statusText" class="save-status">Bereit</div></header>
+  <main class="app-shell">
+    <aside class="setup-panel">
+      <section class="panel-title"><span>Turnier-Setup</span><button class="icon-button" data-action="reset" title="Turnier zurücksetzen">↺</button></section>
+      <label class="field-label" for="tournamentName">Turniername</label>
+      <input id="tournamentName" data-setting="name" class="text-input" placeholder="z. B. Sommer-Cup">
+      <label class="field-label" for="modeSelect">Turniermodus</label>
+      <select id="modeSelect" data-setting="mode" class="text-input">
+        <option value="table">Nur Tabelle</option><option value="knockout">Nur KO</option>
+        <option value="groups">Gruppen + KO</option><option value="swiss">Schweizer System</option>
+      </select>
+      <div id="modeOptions" class="options"></div>
+      <div class="divider"></div>
+      <section class="players-heading"><span>Spieler <b id="playerCount">0</b></span><small>Teilnehmende Teams</small></section>
+      <form id="addPlayerForm" class="add-player" autocomplete="off"><input id="playerInput" class="text-input" placeholder="Teamname eingeben" maxlength="40"><button class="add-button" type="submit" data-action="add-player" aria-label="Spieler hinzufügen">+</button></form>
+      <div id="playerList" class="player-list scroll-area"></div>
+      <button class="primary-button" data-action="generate">Turnier erstellen <span>→</span></button>
+    </aside>
+    <section class="content-panel">
+      <div class="content-head"><div><p class="eyebrow">LIVE TURNIERZENTRALE</p><h1 id="viewTitle">Dein Turnier</h1></div><div id="headerActions"></div></div>
+      <div id="emptyState" class="empty-state"><div class="ball">⚽</div><h2>Bereit für den Anpfiff?</h2><p>Füge Teams hinzu, wähle einen Modus und erstelle deinen Spielplan.</p></div>
+      <div id="tournamentView" hidden></div>
+    </section>
+  </main>
+  <template id="toastTemplate"><div class="toast"></div></template>
+</body>
+</html>
